@@ -89,7 +89,7 @@ export const SpotlightBackground = ({
         className='pointer-events-none absolute -inset-px opacity-0 blur-3xl transition duration-300'
         style={{
           opacity,
-          background: `radial-gradient(70vmin circle at ${position.x}px ${position.y}px, rgba(255,255,255,.2), transparent 40%)`,
+          background: `radial-gradient(70vmin circle at ${position.x}px ${position.y}px, rgba(255,255,255,.4), transparent 40%)`,
         }}
       />
       {children}

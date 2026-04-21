@@ -1,20 +1,19 @@
 'use server';
 
-import { contactSchema, subscribeSchema } from './schema';
+import { subscribeSchema } from './schema';
 import { TSubscribeResponse } from './types';
 
-export async function contactUs(
-  prevState: any,
+export async function subscribe(
+  prevState: TSubscribeResponse | null,
   formData: FormData
 ): Promise<TSubscribeResponse> {
   let response = {} as TSubscribeResponse;
 
   try {
-    const validatedFields = contactSchema.safeParse({
+    const validatedFields = subscribeSchema.safeParse({
       email: formData.get('email'),
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
-      agree: formData.get('agree'),
     });
 
     //issue with Zod typescript
@@ -35,7 +34,7 @@ export async function contactUs(
         accept: 'application/json',
         'content-type': 'application/json',
         'api-key': process.env.BREVO_API_KEY,
-        'user-agent': 'mar-co/subscribe (vercel)',
+        'user-agent': 'novella/subscribe (vercel)',
       },
       body: JSON.stringify({
         updateEnabled: true,
@@ -54,74 +53,6 @@ export async function contactUs(
     }
 
     notifyAdmin(fields);
-    notifySubscriber(
-      fields,
-      "<p>Thank you for getting in touch with MAR-CO Digital.</p><p>We will contact you within 24 hours to discuss your enquiry.</p><p>In the meantime, check out our latest updates on <a href='https://www.linkedin.com/company/mar-co.digital/'>LinkedIn</a>.</p>"
-    );
-    response = {
-      wasSuccessful: true,
-      data: res?.status === 204 ? 'No Content' : await res.json(),
-      fields: fields,
-    };
-  } catch (e) {
-    response = {
-      wasSuccessful: false,
-      error: e,
-    };
-  }
-  return response;
-}
-export async function subscribe(
-  prevState: any,
-  formData: FormData
-): Promise<TSubscribeResponse> {
-  let response = {} as TSubscribeResponse;
-
-  try {
-    const honeypot = formData.get('company'); //honeypot field to prevent bots
-    if (honeypot) {
-      throw 'Bot detected';
-    }
-    const validatedFields = subscribeSchema.safeParse({
-      email: formData.get('email'),
-    });
-    //issue with Zod typescript
-    if (validatedFields.success === false) {
-      throw validatedFields.error.format();
-    }
-
-    if (!process.env.BREVO_API_KEY)
-      throw 'Brevo API Key  not configured properly';
-    const listId = 12;
-    if (!listId || Number.isNaN(listId))
-      throw 'Brevo List ID environment variable is invalid';
-
-    const fields = validatedFields.data;
-    const res = await fetchWithRetry('https://api.brevo.com/v3/contacts', {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY,
-        'user-agent': 'mar-co/subscribe (vercel)',
-      },
-      body: JSON.stringify({
-        updateEnabled: true,
-        email: fields.email,
-        listIds: [listId],
-      }),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw errorData;
-    }
-
-    notifyAdmin(fields);
-    notifySubscriber(
-      fields,
-      "<p>Thank you for getting in touch with MAR-CO Digital.</p><p>We will contact you within 24 hours to discuss your enquiry.</p><p>In the meantime, check out our latest updates on <a href='https://www.linkedin.com/company/mar-co.digital/'>LinkedIn</a>.</p>"
-    );
     response = {
       wasSuccessful: true,
       data: res?.status === 204 ? 'No Content' : await res.json(),
@@ -143,14 +74,23 @@ const RETRYABLE_CODES = new Set([
   'EAI_AGAIN',
 ]);
 
+type FetchWithRetryOptions = {
+  retries?: number;
+  timeoutMs?: number;
+};
+type FetchError = Error & {
+  cause?: { code?: string };
+  code?: string;
+  name?: string;
+};
 async function fetchWithRetry(
   url: string,
   init: RequestInit,
-  opts: { retries?: number; timeoutMs?: number } = {}
+  opts: FetchWithRetryOptions = {}
 ) {
   const retries = opts.retries ?? 3;
   const timeoutMs = opts.timeoutMs ?? 10000;
-  let lastError: any = null;
+  let lastError: FetchError | null = null;
   for (let attempt = 1; attempt <= retries; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -162,12 +102,13 @@ async function fetchWithRetry(
       });
       clearTimeout(timer);
       return res;
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearTimeout(timer);
-      lastError = err;
-      const code = err?.cause?.code || err?.code;
-      const isAbort = err?.name === 'AbortError';
-      const retryable = RETRYABLE_CODES.has(code) || isAbort;
+      lastError = err as FetchError;
+      const code =
+        (err as FetchError)?.cause?.code || (err as FetchError)?.code;
+      const isAbort = (err as FetchError)?.name === 'AbortError';
+      const retryable = RETRYABLE_CODES.has(code ?? '') || isAbort;
       if (attempt < retries && retryable) {
         // simple backoff
         await new Promise(r => setTimeout(r, 400 * attempt));
@@ -191,11 +132,14 @@ const notifyAdmin = async (fields: {
     headers: {
       'Content-Type': 'application/json',
       'api-key': process.env.BREVO_API_KEY,
-      'user-agent': 'mar-co/subscribe (vercel)',
+      'user-agent': 'novella/subscribe',
     },
     body: JSON.stringify({
-      sender: { name: 'System Notification', email: 'info@mar-co.digital' },
-      to: [{ email: 'info@mar-co.digital', name: 'MAR-CO Digital' }],
+      sender: {
+        name: 'System Notification',
+        email: 'info@novella-studio.co.uk',
+      },
+      to: [{ email: 'info@novella-studio.co.uk', name: 'Novella Studio' }],
       subject: 'New Contact Added to Your List',
       htmlContent: `
         <p>A new contact has been added to your Brevo list:</p>
@@ -223,10 +167,13 @@ const notifySubscriber = async (
     headers: {
       'Content-Type': 'application/json',
       'api-key': process.env.BREVO_API_KEY,
-      'user-agent': 'mar-co/subscribe (vercel)',
+      'user-agent': 'novella/subscribe',
     },
     body: JSON.stringify({
-      sender: { name: 'System Notification', email: 'info@mar-co.digital' },
+      sender: {
+        name: 'System Notification',
+        email: 'info@novella-studio.co.uk',
+      },
       to: [
         {
           email: fields.email,
