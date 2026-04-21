@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '../components/ui/header';
 import Footer from '../components/ui/footer';
 import { cn } from '@/lib/utils';
+import Head from 'next/dist/shared/lib/head';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -39,6 +40,9 @@ export default function RootLayout({
         geist.variable
       )}
     >
+      <Head>
+        <meta name='apple-mobile-web-app-title' content='Novella' />
+      </Head>
       <body className='flex min-h-full flex-col'>
         <Header />
         {children}
