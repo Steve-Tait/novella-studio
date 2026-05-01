@@ -113,7 +113,7 @@ const ContactForm = ({ children }: { children: React.ReactNode }) => {
                       type={type || 'text'}
                       name={name}
                       placeholder={placeholder}
-                      className='focus:outline-primary outline-inset bg-ivory text-umber w-full min-w-0 rounded-xl px-4 py-3 outline-2 outline-transparent duration-300'
+                      className='focus:outline-primary outline-inset bg-ivory border-brass text-umber w-full min-w-0 rounded-xl border px-4 py-3 outline-2 outline-transparent duration-300'
                     />
                   </>
                 )}

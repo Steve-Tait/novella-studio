@@ -1,11 +1,19 @@
 import Container from './container';
 import Logo from '../icon/Logo';
 import ArrowRight from '../icon/ArrowRight';
+import ContactForm from './contact-form';
 
 export default function Footer() {
   return (
     <footer className='bg-foreground text-background py-10'>
-      <Container className='flex flex-col gap-y-10 lg:gap-y-30'>
+      <Container className='flex flex-col gap-y-10'>
+        <div id='subscribe' className='mx-auto max-w-3xl'>
+          <ContactForm>
+            <h3 className='mb-6 text-2xl md:text-3xl'>
+              Sign up to be the first to hear about our official launch.
+            </h3>
+          </ContactForm>
+        </div>
         <hr />
         <div className='grid gap-x-20 gap-y-10 md:grid-cols-2 md:items-end'>
           <Logo className='h-10 lg:h-15' />

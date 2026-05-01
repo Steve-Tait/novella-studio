@@ -1,28 +1,24 @@
-import ContactForm from '@/components/ui/contact-form';
 import Container from '../components/ui/container';
 import { SpotlightBackground } from '../components/ui/spotlight-background';
-import Instagram from '@/components/icon/Instagram';
-import LinkedIn from '@/components/icon/LinkedIn';
+import { buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   return (
     <main className='flex w-full flex-1 flex-col items-center justify-between'>
       <SpotlightBackground>
         <Container className='flex flex-col'>
-          <div className='flex min-h-screen items-center py-20 md:py-40'>
-            <h1 className='text-center text-[12vmin] text-balance'>
+          <div className='flex min-h-screen flex-col items-center justify-center gap-y-4 py-20 text-center md:py-40'>
+            <h1 className='text-[12vmin] text-balance'>
               <em>You</em> are your most powerful business asset.
             </h1>
-          </div>
-          <div id='subscribe' className='mx-auto max-w-3xl pb-20 md:pb-40'>
-            <ContactForm>
-              <div className='mb-6 flex flex-col gap-y-2'>
-                <h3 className='text-2xl md:text-3xl'>
-                  Novella Studio is launch in Summer 2026!
-                </h3>
-                <p className='text-xl'>Sign up for exclusive first access:</p>
-              </div>
-            </ContactForm>
+            <p className='text-2xl md:text-3xl'>
+              Novella Studio is launching Summer 2026.
+            </p>
+            <Link href='#subscribe' className={cn(buttonVariants(), 'mt-4')}>
+              Exclusive First Access
+            </Link>
           </div>
         </Container>
       </SpotlightBackground>
