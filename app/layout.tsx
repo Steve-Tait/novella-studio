@@ -41,6 +41,19 @@ export default function RootLayout({
       )}
     >
       <Head>
+        <link rel='icon' href='/favicon.ico' sizes='any' />
+        <link
+          rel='icon'
+          href='/icon?<generated>'
+          type='image/<generated>'
+          sizes='<generated>'
+        />
+        <link
+          rel='apple-touch-icon'
+          href='/apple-icon?<generated>'
+          type='image/<generated>'
+          sizes='<generated>'
+        />
         <meta name='apple-mobile-web-app-title' content='Novella' />
       </Head>
       <body className='flex min-h-full flex-col'>
