@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
-import { Newsreader, Fustat, Geist } from 'next/font/google';
+import { Newsreader, Fustat } from 'next/font/google';
 import './globals.css';
 import Header from '../components/ui/header';
 import Footer from '../components/ui/footer';
 import { cn } from '@/lib/utils';
 import Head from 'next/dist/shared/lib/head';
-
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const fustat = Fustat({
   variable: '--font-fustat',
@@ -36,10 +35,10 @@ export default function RootLayout({
         'antialiased',
         fustat.variable,
         newsreader.variable,
-        'font-sans',
-        geist.variable
+        'font-sans'
       )}
     >
+      <GoogleTagManager gtmId='G-VE2EQWDNXK' />
       <Head>
         <link rel='icon' href='/favicon.ico' sizes='any' />
         <link
